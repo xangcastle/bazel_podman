@@ -174,6 +174,18 @@ CONF_EOF
 
 echo "   Config written to ~/.config/containers/containers.conf"
 echo ""
+
+echo "3️⃣  Configuring container registries..."
+cat > ~/.config/containers/registries.conf << 'REG_EOF'
+# GitHub Container Registry configuration
+unqualified-search-registries = ["ghcr.io"]
+
+[[registry]]
+location = "ghcr.io"
+REG_EOF
+
+echo "   Config written to ~/.config/containers/registries.conf"
+echo ""
 echo "Configuration complete!"
 echo ""
 
