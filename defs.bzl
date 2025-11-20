@@ -1,8 +1,8 @@
 ContainerEngineInfo = provider(
-    fields = {"executable_file": "The file object of the container engine binary", "executable_path": "The path to the container engine binary"},
+    fields = {"executable_file": "The file object of the podman binary", "executable_path": "The path to the podman binary"},
 )
 
-container_engine_toolchain = rule(
+podman_toolchain_rule = rule(
     implementation = lambda ctx: [
         platform_common.ToolchainInfo(
             engine_info = ContainerEngineInfo(

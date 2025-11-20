@@ -1,12 +1,12 @@
-load(":defs.bzl", "container_engine_toolchain")
+load(":defs.bzl", "podman_toolchain_rule")
 
 toolchain_type(
     name = "podman_toolchain_type",
 )
 
-container_engine_toolchain(
+podman_toolchain_rule(
     name = "podman_toolchain_impl",
-    executable = "@podman_engine//:engine_binary",
+    executable = "@podman//:engine_binary",
 )
 
 toolchain(
