@@ -46,54 +46,6 @@ def _detect_platform_key(repo_ctx):
     arch_norm = _normalize_arch(repo_ctx.os.arch)
     return "{}_{}".format(os_norm, arch_norm)
 
-def _podman_wrapper_impl(ctx):
-    podman_binary = ctx.files.binary[0]
-
-    wrapper = ctx.actions.declare_file(ctx.label.name)
-
-    workspace = ctx.label.workspace_name if ctx.label.workspace_name else ctx.workspace_name
-    binary_path = podman_binary.short_path
-
-    script_content = """#!/usr/bin/env bash
-set -euo pipefail
-
-if [[ -n "${{RUNFILES_DIR:-}}" ]]; then
-    RUNFILES="$RUNFILES_DIR"
-elif [[ -n "${{RUNFILES:-}}" ]]; then
-    RUNFILES="$RUNFILES"
-else
-    RUNFILES="${{BASH_SOURCE[0]}}.runfiles"
-fi
-
-export CONTAINERS_HELPER_BINARY_DIR="$RUNFILES/{workspace}"
-
-exec "$RUNFILES/{workspace}/{path}" "$@"
-""".format(
-        workspace = workspace,
-        path = binary_path,
-    )
-
-    ctx.actions.write(
-        output = wrapper,
-        content = script_content,
-        is_executable = True,
-    )
-
-    return [
-        DefaultInfo(
-            executable = wrapper,
-            runfiles = ctx.runfiles(files = [podman_binary]),
-        ),
-    ]
-
-podman_wrapper = rule(
-    implementation = _podman_wrapper_impl,
-    attrs = {
-        "binary": attr.label(allow_files = True),
-    },
-    executable = True,
-)
-
 def _podman_repo_impl(repo_ctx):
     version = repo_ctx.attr.version
     gvproxy_version = repo_ctx.attr.gvproxy_version
@@ -149,69 +101,32 @@ def _podman_repo_impl(repo_ctx):
     if vfkit_url and repo_ctx.path("vfkit.bin").exists:
         repo_ctx.symlink("vfkit.bin", "vfkit")
 
-    # Generate setup script from template
-    template = repo_ctx.read(Label("@//tools/podman:setup.tpl"))
-    setup_script = template.format(helper_dir = str(repo_ctx.path(".")))
-    repo_ctx.file("podman_setup.sh", setup_script, executable = True)
+    repo_ctx.template(
+        "podman_setup.sh",
+        Label("@//tools/podman:setup.tpl"),
+        substitutions = {
+            "{helper_dir}": str(repo_ctx.path(".")),
+        },
+        executable = True,
+    )
 
-    vfkit_data = """
-        ":vfkit",""" if vfkit_url else ""
-
-    build_content = """
-load("@//tools/podman:repo.bzl", "podman_wrapper")
-
-package(default_visibility = ["//visibility:public"])
-
-filegroup(
-    name = "engine_binary",
-    srcs = glob(
-        include = [
-            "**/bin/podman*",
-            "**/usr/bin/podman*",
-            "**/usr/local/bin/podman*",
-            "**/bin/*",
-            "**/usr/bin/*",
-            "**/usr/local/bin/*",
-            "**/libexec/**/*",
-        ],
-        exclude = [
-            "**/*.md",
-            "**/*.txt",
-            "**/*.1",
-        ],
-        allow_empty = True,
-    ),
-)
-
-podman_wrapper(
-    name = "podman",
-    binary = ":engine_binary",
-)
-
-podman_wrapper(
-    name = "gvproxy",
-    binary = "gvproxy.bin",
-)
-{vfkit_wrapper}
-sh_binary(
-    name = "setup",
-    srcs = ["podman_setup.sh"],
-    data = [
-        ":podman",
-        ":gvproxy",{vfkit_data}
-    ],
-)
-""".format(
-        vfkit_wrapper = """
+    vfkit_wrapper = """
 podman_wrapper(
     name = "vfkit",
     binary = "vfkit.bin",
 )
-""" if vfkit_url else "",
-        vfkit_data = vfkit_data,
+""" if vfkit_url else ""
+    vfkit_data = """
+        ":vfkit",""" if vfkit_url else ""
+    
+    repo_ctx.template(
+        "BUILD.bazel",
+        Label("@//tools/podman:BUILD.bazel.tpl"),
+        substitutions = {
+            "{vfkit_wrapper}": vfkit_wrapper,
+            "{vfkit_data}": vfkit_data,
+        },
     )
-
-    repo_ctx.file("BUILD.bazel", build_content)
 
 podman_repo = repository_rule(
     implementation = _podman_repo_impl,
@@ -227,5 +142,3 @@ podman_repo = repository_rule(
         "vfkit_sha256_override": attr.string_dict(default = {}),
     },
 )
-
-

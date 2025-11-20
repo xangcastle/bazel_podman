@@ -1,12 +1,18 @@
 load(":defs.bzl", "podman_toolchain_rule")
 
+exports_files([
+    "setup.tpl",
+    "wrapper.tpl",
+    "BUILD.bazel.tpl",
+])
+
 toolchain_type(
     name = "podman_toolchain_type",
 )
 
 podman_toolchain_rule(
     name = "podman_toolchain_impl",
-    executable = "@podman//:engine_binary",
+    executable = "@podman//:runtime",
 )
 
 toolchain(
