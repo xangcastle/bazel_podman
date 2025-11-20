@@ -1,0 +1,17 @@
+load(":defs.bzl", "container_engine_toolchain")
+
+toolchain_type(
+    name = "podman_toolchain_type",
+)
+
+container_engine_toolchain(
+    name = "podman_toolchain_impl",
+    executable = "@podman_engine//:engine_binary",
+)
+
+toolchain(
+    name = "podman_toolchain",
+    toolchain = ":podman_toolchain_impl",
+    toolchain_type = ":podman_toolchain_type",
+)
+
