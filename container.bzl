@@ -6,7 +6,7 @@ def _container_run_impl(ctx):
     env_flags = ""
     if ctx.attr.env:
         for key, value in ctx.attr.env.items():
-            env_flags += "-e " + key + "=" + value + " "
+            env_flags += "-e \"" + key + "=" + value.replace("\"", "\\\"") + "\" "
 
     port_flags = ""
     if ctx.attr.ports:

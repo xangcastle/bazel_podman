@@ -15,28 +15,24 @@ case "$OS" in
     *)          PLATFORM="unknown";;
 esac
 
-echo "1️⃣  Creating config directory..."
 mkdir -p ~/.config/containers
+echo "1️⃣  Config directory created ~/.config/containers"
 
-echo "2️⃣  Configuring helper binaries location..."
 cat > ~/.config/containers/containers.conf << 'CONF_EOF'
 [engine]
 helper_binaries_dir=["{helper_dir}"]
 CONF_EOF
+echo "2️⃣  Helper binaries location configs written to ~/.config/containers/containers.conf"
 
-echo "   Config written to ~/.config/containers/containers.conf"
-echo ""
-
-echo "3️⃣  Configuring container registries..."
 cat > ~/.config/containers/registries.conf << 'REG_EOF'
-# GitHub Container Registry configuration
-unqualified-search-registries = ["ghcr.io"]
+# Docker Hub configuration
+unqualified-search-registries = ["docker.io"]
 
 [[registry]]
-location = "ghcr.io"
+location = "docker.io"
 REG_EOF
+echo "3️⃣  Container registries configs written to ~/.config/containers/registries.conf"
 
-echo "   Config written to ~/.config/containers/registries.conf"
 echo ""
 echo "✨ Configuration complete!"
 echo ""
@@ -50,9 +46,6 @@ if [ "$PLATFORM" = "linux" ]; then
     echo ""
     echo "  1️⃣  Use Podman directly:"
     echo "      bazel run @podman//:podman -- <command>"
-    echo ""
-    echo "  2️⃣  Login to GitHub Container Registry:"
-    echo "      echo \$GITHUB_TOKEN | bazel run @podman//:podman -- login ghcr.io -u username --password-stdin"
     echo ""
     echo "  💡 Or with bazel_env:"
     echo "      bazel run //:bazel_env"
@@ -68,14 +61,13 @@ else
     echo "  2️⃣  Start the machine:"
     echo "      bazel run @podman//:podman -- machine start"
     echo ""
-    echo "  3️⃣  Use Podman directly:"
+    echo "  3️⃣  Use Podman with bazel:"
     echo "      bazel run @podman//:podman -- <command>"
     echo ""
-    echo "  4️⃣  Login to GitHub Container Registry:"
-    echo "      echo \$GITHUB_TOKEN | bazel run @podman//:podman -- login ghcr.io -u username --password-stdin"
-    echo ""
-    echo "  💡 Or use bazel_env for easier access:"
+    echo "  💡 Or finish setup by running:"
     echo "      bazel run //:bazel_env"
+    echo ""
+    echo "      Then you can use podman directly"
     echo "      podman <command>"
 fi
 echo ""
