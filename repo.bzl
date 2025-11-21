@@ -118,7 +118,7 @@ podman_wrapper(
 """ if vfkit_url else ""
     vfkit_data = """
         ":vfkit",""" if vfkit_url else ""
-    
+
     repo_ctx.template(
         "BUILD.bazel",
         Label("@//tools/podman:BUILD.bazel.tpl"),

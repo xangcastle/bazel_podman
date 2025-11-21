@@ -1,4 +1,3 @@
-
 def _podman_wrapper_impl(ctx):
     podman_binary = ctx.files.binary[0]
 

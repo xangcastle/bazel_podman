@@ -3,7 +3,7 @@ load("@//tools/podman:wrapper.bzl", "podman_wrapper")
 package(default_visibility = ["//visibility:public"])
 
 filegroup(
-    name = "runtime",
+    name = "binary_files",
     srcs = glob(
         include = [
             "**/bin/podman*",
@@ -25,7 +25,7 @@ filegroup(
 
 podman_wrapper(
     name = "podman",
-    binary = ":runtime",
+    binary = ":binary_files",
 )
 
 podman_wrapper(

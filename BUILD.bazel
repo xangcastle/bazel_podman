@@ -1,4 +1,4 @@
-load(":defs.bzl", "podman_toolchain_rule")
+load(":toolchain.bzl", "podman_toolchain_rule")
 
 exports_files([
     "setup.tpl",
@@ -12,7 +12,7 @@ toolchain_type(
 
 podman_toolchain_rule(
     name = "podman_toolchain_impl",
-    executable = "@podman//:runtime",
+    executable = "@podman//:binary_files",
 )
 
 toolchain(
@@ -20,4 +20,3 @@ toolchain(
     toolchain = ":podman_toolchain_impl",
     toolchain_type = ":podman_toolchain_type",
 )
-
