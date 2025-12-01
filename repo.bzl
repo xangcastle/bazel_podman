@@ -78,23 +78,56 @@ def _podman_repo_impl(repo_ctx):
     gvproxy_sha256 = gvproxy_sha256_map.get(platform_key) if gvproxy_sha256_map else None
     vfkit_sha256 = vfkit_sha256_map.get(platform_key) if vfkit_sha256_map else None
 
+    main_canonical_id = "podman-{}-{}".format(version, platform_key)
     if sha256:
-        repo_ctx.download_and_extract(url = url, sha256 = sha256)
+        repo_ctx.download_and_extract(
+            url = url, 
+            sha256 = sha256, 
+            canonical_id = main_canonical_id,
+        )
     else:
-        repo_ctx.download_and_extract(url = url)
+        repo_ctx.download_and_extract(
+            url = url,
+            canonical_id = main_canonical_id,
+        )
 
     gvproxy_filename = "gvproxy.bin.exe" if platform_key.startswith("windows") else "gvproxy.bin"
+    gvproxy_canonical_id = "gvproxy-{}-{}".format(gvproxy_version, platform_key)
+    
     if gvproxy_sha256:
-        repo_ctx.download(url = gvproxy_url, output = gvproxy_filename, sha256 = gvproxy_sha256, executable = True)
+        repo_ctx.download(
+            url = gvproxy_url, 
+            output = gvproxy_filename, 
+            sha256 = gvproxy_sha256, 
+            executable = True,
+            canonical_id = gvproxy_canonical_id,
+        )
     else:
-        repo_ctx.download(url = gvproxy_url, output = gvproxy_filename, executable = True)
+        repo_ctx.download(
+            url = gvproxy_url, 
+            output = gvproxy_filename, 
+            executable = True,
+            canonical_id = gvproxy_canonical_id,
+        )
 
     if vfkit_url:
         vfkit_filename = "vfkit.bin"
+        vfkit_canonical_id = "vfkit-{}-{}".format(vfkit_version, platform_key)
         if vfkit_sha256:
-            repo_ctx.download(url = vfkit_url, output = vfkit_filename, sha256 = vfkit_sha256, executable = True)
+            repo_ctx.download(
+                url = vfkit_url, 
+                output = vfkit_filename, 
+                sha256 = vfkit_sha256, 
+                executable = True,
+                canonical_id = vfkit_canonical_id,
+            )
         else:
-            repo_ctx.download(url = vfkit_url, output = vfkit_filename, executable = True)
+            repo_ctx.download(
+                url = vfkit_url, 
+                output = vfkit_filename, 
+                executable = True,
+                canonical_id = vfkit_canonical_id,
+            )
 
     if repo_ctx.path("gvproxy.bin").exists:
         repo_ctx.symlink("gvproxy.bin", "gvproxy")
@@ -103,7 +136,7 @@ def _podman_repo_impl(repo_ctx):
 
     repo_ctx.template(
         "podman_setup.sh",
-        Label("@//tools/podman:setup.tpl"),
+        Label("//:setup.tpl"),
         substitutions = {
             "{helper_dir}": str(repo_ctx.path(".")),
         },
@@ -121,7 +154,7 @@ podman_wrapper(
 
     repo_ctx.template(
         "BUILD.bazel",
-        Label("@//tools/podman:BUILD.bazel.tpl"),
+        Label("//:BUILD.bazel.tpl"),
         substitutions = {
             "{vfkit_wrapper}": vfkit_wrapper,
             "{vfkit_data}": vfkit_data,

@@ -1,4 +1,4 @@
-load("@//tools/podman:wrapper.bzl", "podman_wrapper")
+load("@bazel_podman//:wrapper.bzl", "podman_wrapper")
 
 package(default_visibility = ["//visibility:public"])
 

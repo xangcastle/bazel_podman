@@ -1,4 +1,4 @@
-load("//tools/podman:repo.bzl", "podman_repo")
+load("//:repo.bzl", "podman_repo")
 
 def _podman_ext_impl(module_ctx):
     registrations = {}
@@ -33,6 +33,12 @@ def _podman_ext_impl(module_ctx):
             gvproxy_sha256_override = config["gvproxy_sha256_override"],
             vfkit_sha256_override = config["vfkit_sha256_override"],
         )
+
+    return module_ctx.extension_metadata(
+        reproducible = True,
+        root_module_direct_deps = "all",
+        root_module_direct_dev_deps = [],
+    )
 
 _podman_toolchain_tag = tag_class(
     attrs = {

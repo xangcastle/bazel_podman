@@ -1,9 +1,13 @@
+load("@aspect_bazel_lib//lib:write_source_files.bzl", "write_source_files")
+load("@io_bazel_stardoc//stardoc:stardoc.bzl", "stardoc")
 load(":toolchain.bzl", "podman_toolchain_rule")
 
 exports_files([
     "setup.tpl",
     "wrapper.tpl",
     "BUILD.bazel.tpl",
+    "launcher.tpl",
+    "kube_launcher.tpl",
 ])
 
 toolchain_type(
@@ -19,4 +23,45 @@ toolchain(
     name = "podman_toolchain",
     toolchain = ":podman_toolchain_impl",
     toolchain_type = ":podman_toolchain_type",
+)
+
+stardoc(
+    name = "docs_container_raw",
+    out = "container_raw.md",
+    input = "container.bzl",
+    symbol_names = [
+        "container_run",
+        "container_stop",
+        "container_logs",
+        "container_bash",
+    ],
+)
+
+genrule(
+    name = "docs_container",
+    srcs = ["container_raw.md"],
+    outs = ["container_gen.md"],
+    cmd = "sed 's|@cosmos//tools/podman:|@bazel_podman//:|g' $< > $@",
+)
+
+stardoc(
+    name = "docs_kube_raw",
+    out = "kube_raw.md",
+    input = "kube.bzl",
+    symbol_names = ["podman_play_kube"],
+)
+
+genrule(
+    name = "docs_kube",
+    srcs = ["kube_raw.md"],
+    outs = ["kube_gen.md"],
+    cmd = "sed 's|@cosmos//tools/podman:|@bazel_podman//:|g' $< > $@",
+)
+
+write_source_files(
+    name = "update_docs",
+    files = {
+        "container.md": ":docs_container",
+        "kube.md": ":docs_kube",
+    },
 )
