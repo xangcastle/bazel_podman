@@ -1,12 +1,12 @@
 def _podman_play_kube_impl(ctx):
     toolchain = ctx.toolchains["@bazel_podman//:podman_toolchain_type"]
     podman = toolchain.podman_info.executable_file
-    
+
     manifest = ctx.file.manifest
     command = ctx.attr.command
-    
+
     executable = ctx.actions.declare_file(ctx.label.name + ".sh")
-    
+
     ctx.actions.expand_template(
         template = ctx.file._launcher,
         output = executable,
@@ -17,7 +17,7 @@ def _podman_play_kube_impl(ctx):
         },
         is_executable = True,
     )
-    
+
     runfiles = ctx.runfiles(files = [podman, manifest])
     return [DefaultInfo(executable = executable, runfiles = runfiles)]
 
@@ -27,7 +27,7 @@ _podman_play_kube = rule(
         "manifest": attr.label(allow_single_file = [".yaml", ".yml", ".json"], mandatory = True),
         "command": attr.string(default = "play", values = ["play", "down"]),
         "_launcher": attr.label(
-            default = Label("//:kube_launcher.tpl"),
+            default = Label("@bazel_podman//:kube_launcher.tpl"),
             allow_single_file = True,
         ),
     },
@@ -53,7 +53,7 @@ def podman_play_kube(name, manifest, **kwargs):
         command = "play",
         **kwargs
     )
-    
+
     _podman_play_kube(
         name = name + ".down",
         manifest = manifest,
