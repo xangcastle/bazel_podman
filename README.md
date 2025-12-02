@@ -115,7 +115,7 @@ podman_play_kube(
 - Deploy: `bazel run //:app`
 - Teardown: `bazel run //:app.down`
 
-## Development Environment (`bazel_env`)
+## Development Environment ([bazel_env](https://github.com/buildbuddy-io/bazel_env.bzl))
 
 For the best developer experience, use `bazel_env` to add `podman` to your PATH automatically when inside the project.
 This allows you to use `podman` commands directly without `bazel run`.
@@ -130,7 +130,7 @@ This allows you to use `podman` commands directly without `bazel run`.
     load("@bazel_env.bzl", "bazel_env")
 
     bazel_env(
-        name = "env",
+        name = "bazel_env",
         tools = {
             "podman": "@podman//:podman",
         },
